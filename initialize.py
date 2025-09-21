@@ -5,13 +5,26 @@
 ############################################################
 # ライブラリの読み込み
 ############################################################
+# --- SQLite バージョン修正 (Chroma 対策 for Streamlit Cloud) ---
+# 【追加箇所】
+# Streamlit Cloud では標準の sqlite3 が古いため、
+# 新しい sqlite3 を提供する pysqlite3-binary を利用する。
+# sys.modules を書き換えることで、全ライブラリが自動的に新しい sqlite3 を使うようになる。
+try:
+    __import__('pysqlite3')
+    import sys
+    sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+except ImportError:
+    pass
+# 【追加ここまで】
+
 import os
 import logging
 from logging.handlers import TimedRotatingFileHandler
 from uuid import uuid4
 import sys
 import unicodedata
-import pandas as pd   # ★ここでpandasをimport（全体で使えるようにする）
+import pandas as pd   # ★ここでpandasをimport（全体で使えるようにする）CSV処理用
 from dotenv import load_dotenv
 import streamlit as st
 from docx import Document
@@ -19,7 +32,7 @@ from langchain_community.document_loaders import WebBaseLoader
 from langchain.text_splitter import CharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import Chroma
-from langchain.schema import Document  # ★追加: Documentのimportを忘れずに
+from langchain.schema import Document  # ★追加: Documentのimportを忘れずに: RAG用
 import constants as ct
 
 
